@@ -1,29 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { auth, db } from "../firebase"; // Import db instead of firestore
-import { onAuthStateChanged } from "firebase/auth"; // Import auth hook
-import { doc, setDoc, getDoc } from "firebase/firestore"; // Firestore methods to set data
+import { auth, db } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const ProfilePage = () => {
-  const [user, setUser] = useState(null); // State to hold user data
+  const [user, setUser] = useState(null);
   const [phone, setPhone] = useState("");
   const [callTime, setCallTime] = useState("");
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-  const [loading, setLoading] = useState(true); // New loading state
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
-    // Listen to auth state change
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user); // Set the authenticated user to state
-      } else {
-        setUser(null); // If user logs out, set to null
-      }
-      setLoading(false); // Set loading to false once the auth state is determined
+      if (user) setUser(user);
+      else setUser(null);
+      setLoading(false);
     });
 
-    return () => unsubscribe(); // Clean up the listener on component unmount
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -52,7 +48,6 @@ const ProfilePage = () => {
           callTime,
           uid: user.uid,
         });
-        console.log("Saved to Firestore for user:", user.uid);
         setSuccessMsg("Details updated!");
         setTimeout(() => {
           setSuccessMsg("");
@@ -62,37 +57,39 @@ const ProfilePage = () => {
       } catch (error) {
         console.error("Error saving data to Firestore:", error);
       }
-    } else {
-      console.log("No user logged in");
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="p-6 max-w-md mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black text-white font-serif p-6">
+        <h1 className="text-3xl font-bold tracking-wide">Loading...</h1>
       </div>
     );
-  }
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white font-serif p-8 flex flex-col max-w-lg mx-auto">
+      <h1 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-orange-500 tracking-wide">
         Welcome {user?.displayName || "User"}
       </h1>
+
       {successMsg && (
-        <div className="mb-4 text-green-600 font-semibold">{successMsg}</div>
+        <div className="mb-6 p-3 bg-green-900 bg-opacity-60 rounded font-semibold text-green-400 tracking-wide shadow-sm">
+          {successMsg}
+        </div>
       )}
+
       {!isFormSubmitted || isEditing ? (
         <>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="mb-6 text-gray-400 italic tracking-wide">
             {isEditing
               ? "Edit your details below."
               : "Please note that you can only submit this once."}
           </p>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-fuchsia-400 mb-2 tracking-wide">
                 Phone Number
               </label>
               <input
@@ -100,19 +97,20 @@ const ProfilePage = () => {
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 block w-full p-2 border rounded-md"
+                className="w-full p-3 rounded-lg bg-gray-800 border border-fuchsia-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                placeholder="Enter your phone number"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-fuchsia-400 mb-2 tracking-wide">
                 Select Time for Call
               </label>
               <select
                 required
                 value={callTime}
                 onChange={(e) => setCallTime(e.target.value)}
-                className="mt-1 block w-full p-2 border rounded-md"
+                className="w-full p-3 rounded-lg bg-gray-800 border border-fuchsia-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
               >
                 <option value="">Select a time</option>
                 <option value="09:00 AM">09:00 AM</option>
@@ -129,28 +127,33 @@ const ProfilePage = () => {
 
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
+              className="w-full bg-gradient-to-r from-fuchsia-600 to-orange-500 hover:from-orange-500 hover:to-fuchsia-600 transition-colors text-white font-semibold py-3 rounded-lg shadow-lg"
             >
               {isEditing ? "Update Details" : "Schedule Call"}
             </button>
           </form>
+
           {isEditing && (
             <button
               type="button"
-              className="w-full mt-2 bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-500"
               onClick={() => setIsEditing(false)}
+              className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg shadow-inner transition"
             >
               Cancel
             </button>
           )}
         </>
       ) : (
-        <div className="text-lg text-green-500">
+        <div className="text-gray-300 tracking-wide text-lg space-y-3">
           <p>You've already submitted your details!</p>
-          <p>Phone: {phone}</p>
-          <p>Call Time: {callTime}</p>
+          <p>
+            <span className="font-semibold text-fuchsia-400">Phone:</span> {phone}
+          </p>
+          <p>
+            <span className="font-semibold text-fuchsia-400">Call Time:</span> {callTime}
+          </p>
           <button
-            className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            className="mt-6 w-full bg-gradient-to-r from-fuchsia-600 to-orange-500 hover:from-orange-500 hover:to-fuchsia-600 transition-colors text-white font-semibold py-3 rounded-lg shadow-lg"
             onClick={() => setIsEditing(true)}
           >
             Edit Details

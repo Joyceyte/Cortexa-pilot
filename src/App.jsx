@@ -9,6 +9,7 @@ import BottomNavBar from "./components/BottomNavBar";
 import ProfilePage from "./pages/ProfilePage";
 import CallLogPage from "./pages/CallLogPage";
 import SignUpPage from "./pages/SignUpPage";
+import LogDetailPage from "./pages/LogDetailPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -18,6 +19,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<SignUpPage />} />
         <Route path="/logs" element={<CallLogPage />} />
+        <Route path="/logs/:id" element={<LogDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
       {!hideNav && <BottomNavBar />}

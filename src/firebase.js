@@ -21,6 +21,7 @@ const provider = new GoogleAuthProvider();
 const functions = getFunctions(app);
 
 // Connect to Firebase Emulators if running locally
+/*
 if (window.location.hostname === "localhost") {
   // Firestore Emulator
   connectFirestoreEmulator(db, "localhost", 8080);  // Adjust the port if necessary
@@ -31,5 +32,6 @@ if (window.location.hostname === "localhost") {
   // Functions Emulator
   connectFunctionsEmulator(functions, "localhost", 5001);  // Functions emulator port
 }
+  */ 
 
 export { auth, db, provider, functions };
