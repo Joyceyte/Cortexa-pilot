@@ -26,48 +26,54 @@ const LogDetailPage = () => {
 
   if (loading)
     return (
-      <div className="text-white mt-10 text-center">Loading...</div>
-    );
-  if (!log)
-    return (
-      <div className="text-red-400 mt-10 text-center">Log not found</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-gray-300">
+        Loading...
+      </div>
     );
 
-  // Clean up transcript spacing
+  if (!log)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-red-500">
+        Log not found
+      </div>
+    );
+
   const cleanedTranscript = log.transcript
+    .replace(/\r\n|\r/g, "\n") // normalize all breaks to \n
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .join("\n\n");
 
   return (
-    <div className="w-screen min-h-screen p-8 bg-gradient-to-br from-gray-900 to-black text-white font-serif flex flex-col max-w-4xl mx-auto">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate("/logs")}
-        className="mb-6 self-start text-fuchsia-400 hover:text-orange-400 transition-colors font-semibold flex items-center gap-1"
-      >
-        ← Back
-      </button>
+    <div className="min-h-screen bg-gray-950 text-gray-200 px-4 py-6">
+      <div className="max-w-2xl mx-auto flex flex-col gap-6">
+        {/* Back */}
+        <button
+          onClick={() => navigate("/logs")}
+          className="text-sm text-gray-400 hover:text-orange-300 transition-colors"
+        >
+          ← Back
+        </button>
 
-      <header className="mb-10 text-center">
-        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-orange-500 tracking-wide">
-          {log.title}
-        </h1>
-        <p className="text-gray-400 mt-3 italic tracking-wide">
-          Your personal Cortexa journal entry
+        {/* Title */}
+        <div>
+          <h1 className="text-2xl font-bold text-orange-300">{log.title}</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Written by you, felt by Cortexa
+          </p>
+        </div>
+
+        {/* Log Body */}
+        <div className="whitespace-pre-wrap text-base leading-relaxed text-gray-300 border border-red-500 p-5 bg-gray-900 tracking-wide">
+          {cleanedTranscript}
+        </div>
+
+        {/* Footer Vibe */}
+        <p className="text-center text-xs text-gray-600 mt-6">
+          You made it through today. That's worth logging.
         </p>
-      </header>
-
-      <main
-        className="flex-1 overflow-y-auto bg-gray-900 border border-fuchsia-800 rounded-lg p-8 shadow-lg leading-relaxed text-gray-300 text-lg whitespace-pre-wrap"
-        style={{ whiteSpace: "pre-wrap" }}
-      >
-        {cleanedTranscript}
-      </main>
-
-      {/* Add some padding below main so scroll shows bottom nicely */}
-      <div className="h-10" />
+      </div>
     </div>
   );
 };

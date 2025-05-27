@@ -85,7 +85,10 @@ exports.scheduledFetchTranscripts = onSchedule("every 2 minutes", async () => {
 
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
-      const pendingCallsRef = admin.firestore().collection("users").doc(userId).collection("pendingCalls");
+      const pendingCallsRef = admin.firestore()
+        .collection("users")
+        .doc(userId)
+        .collection("pendingCalls");
       const pendingCallsSnapshot = await pendingCallsRef.get();
 
       for (const callDoc of pendingCallsSnapshot.docs) {
@@ -107,7 +110,10 @@ exports.scheduledFetchTranscripts = onSchedule("every 2 minutes", async () => {
 
         const transcriptData = await response.json();
 
-        if (transcriptData.concatenated_transcript?.length > 0) {
+        if (
+          transcriptData.status === "completed" &&
+          transcriptData.concatenated_transcript?.length > 0
+        ) {
           const transcriptText = transcriptData.concatenated_transcript;
 
           const callDate = new Date(transcriptData.created_at).toLocaleString("en-AU", {
@@ -116,7 +122,7 @@ exports.scheduledFetchTranscripts = onSchedule("every 2 minutes", async () => {
             month: "long",
             day: "numeric",
             hour: "2-digit",
-            minute: "2-digit"
+            minute: "2-digit",
           });
 
           const title = `Call at ${callDate}`;
@@ -130,13 +136,14 @@ exports.scheduledFetchTranscripts = onSchedule("every 2 minutes", async () => {
               transcript: transcriptText,
               title,
               callDate,
-              summary: transcriptData.summary
+              summary: transcriptData.summary,
             });
 
           await pendingCallsRef.doc(callId).delete();
-          console.log(`✅ Saved & cleaned up call ${callId} for user ${userId}`);
+
+          console.log(`✅ Saved & cleaned up completed call ${callId} for user ${userId}`);
         } else {
-          console.log(`⏳ Transcript not ready for call ${callId}`);
+          console.log(`⏳ Transcript not complete for call ${callId}, status: ${transcriptData.status}`);
         }
       }
     }
@@ -146,6 +153,7 @@ exports.scheduledFetchTranscripts = onSchedule("every 2 minutes", async () => {
     console.error("❌ Scheduled transcript fetch failed:", error);
   }
 });
+
 
 
 /*
