@@ -375,7 +375,7 @@ const ProfilePage = () => {
           <div className="space-y-6">
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
               <h2 className="text-lg font-semibold text-orange-300 mb-4">
-                Your Current Setup
+                Your Current Setup: Daily calls begin Friday 30th of May
               </h2>
 
               <div className="space-y-3 text-gray-300 text-base">
