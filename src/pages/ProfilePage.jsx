@@ -28,15 +28,15 @@ const ProfilePage = () => {
   )}&emotion[]=happy`;
   const affirmations = [
     "You can hold joy and uncertainty at the same time.",
-    "You’re allowed to feel good without needing a reason.",
-    "Today doesn’t need to be perfect to be meaningful.",
+    "You're allowed to feel good without needing a reason.",
+    "Today doesn't need to be perfect to be meaningful.",
     "Small wins are still wins. Let them count.",
     "Let your energy be what it is today.",
-    "You’re allowed to take up space, even when things are calm.",
+    "You're allowed to take up space, even when things are calm.",
     "Not every moment needs fixing. Some just need noticing.",
     "You can move forward without rushing.",
     "Clarity takes time. Let it come on its own terms.",
-    "Be proud of how far you’ve come.",
+    "Be proud of how far you've come.",
     "Some days will be soft. Let this be one if it is.",
   ];
   const [affirmation, setAffirmation] = useState("");
@@ -49,7 +49,20 @@ const ProfilePage = () => {
 
   const fetchTakenTimes = async () => {
     const querySnapshot = await getDocs(collection(db, "takenCallTimes"));
-    const usedTimes = querySnapshot.docs.map((doc) => doc.id);
+    const usedTimes = querySnapshot.docs.map((doc) => {
+      const time = doc.id;
+      // If it's already in 24h format, return as is
+      if (!time.includes("AM") && !time.includes("PM")) {
+        return time;
+      }
+      // Convert 12h format to 24h format
+      const [timePart, period] = time.split(" ");
+      const [hour, minute] = timePart.split(":");
+      let hour24 = parseInt(hour);
+      if (period === "PM" && hour24 !== 12) hour24 += 12;
+      if (period === "AM" && hour24 === 12) hour24 = 0;
+      return `${hour24.toString().padStart(2, "0")}:${minute}`;
+    });
     setTakenTimes(usedTimes);
   };
 
@@ -84,7 +97,28 @@ const ProfilePage = () => {
         if (userSnap.exists()) {
           const data = userSnap.data();
           setPhone(data.phone || "");
-          setCallTime(data.callTime || "");
+
+          // Handle both old and new time formats
+          if (data.displayTime) {
+            setCallTime(data.displayTime);
+            const [time, period] = data.displayTime.split(" ");
+            const [h, m] = time.split(":");
+            setHour(h);
+            setMinute(m);
+            setPeriod(period);
+          } else if (data.callTime) {
+            // Convert 24h format to 12h format
+            const [h, m] = data.callTime.split(":");
+            const hour24 = parseInt(h);
+            const period = hour24 >= 12 ? "PM" : "AM";
+            const hour12 = hour24 % 12 || 12;
+            const displayTime = `${hour12}:${m} ${period}`;
+            setCallTime(displayTime);
+            setHour(hour12.toString());
+            setMinute(m);
+            setPeriod(period);
+          }
+
           setIsFormSubmitted(true);
         }
       }
@@ -94,8 +128,14 @@ const ProfilePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formattedTime = `${hour}:${minute} ${period}`;
-    if (!formattedTime) return alert("Pick a time first!");
+    const displayTime = `${hour}:${minute} ${period}`;
+    if (!displayTime) return alert("Pick a time first!");
+
+    // Convert to 24-hour format for storage
+    let hour24 = parseInt(hour);
+    if (period === "PM" && hour24 !== 12) hour24 += 12;
+    if (period === "AM" && hour24 === 12) hour24 = 0;
+    const storageTime = `${hour24.toString().padStart(2, "0")}:${minute}`;
 
     // Validate phone number format
     if (phone.length !== 12) {
@@ -107,15 +147,15 @@ const ProfilePage = () => {
     if (user) {
       try {
         const userDocRef = doc(db, "users", user.uid);
-        const timeSlotDocRef = doc(db, "takenCallTimes", formattedTime);
+        const timeSlotDocRef = doc(db, "takenCallTimes", storageTime);
 
         const userSnap = await getDoc(userDocRef);
         const oldCallTime = userSnap.exists() ? userSnap.data().callTime : null;
 
-        if (formattedTime === oldCallTime) {
+        if (storageTime === oldCallTime) {
           await setDoc(userDocRef, {
             phone,
-            callTime: formattedTime,
+            callTime: storageTime,
             uid: user.uid,
           });
           setSuccessMsg("Details updated!");
@@ -133,14 +173,14 @@ const ProfilePage = () => {
           return;
         }
 
-        if (oldCallTime && oldCallTime !== formattedTime) {
+        if (oldCallTime && oldCallTime !== storageTime) {
           const oldTimeSlotDocRef = doc(db, "takenCallTimes", oldCallTime);
           await deleteDoc(oldTimeSlotDocRef);
         }
 
         await setDoc(userDocRef, {
           phone,
-          callTime: formattedTime,
+          callTime: storageTime,
           uid: user.uid,
         });
 
@@ -150,7 +190,7 @@ const ProfilePage = () => {
         });
 
         await fetchTakenTimes();
-        setCallTime(formattedTime);
+        setCallTime(displayTime);
         setSuccessMsg("Details updated!");
         setTimeout(() => {
           setSuccessMsg("");
@@ -197,7 +237,7 @@ const ProfilePage = () => {
           </p>
         </div>
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-400">Today’s affirmation</p>
+          <p className="text-sm text-gray-400">Today's affirmation</p>
           <blockquote className="mt-2 text-base italic text-gray-300 max-w-md mx-auto leading-relaxed border-l-4 border-orange-400 pl-4">
             {affirmation}
           </blockquote>
@@ -257,7 +297,7 @@ const ProfilePage = () => {
                     setter: setPeriod,
                     options: ["AM", "PM"],
                   },
-                ].map(({ label, val, setter, range, options }, i) => (
+                ].map(({ label, val, setter, range, options }) => (
                   <div key={label} className="relative w-1/3">
                     <select
                       value={val}
@@ -285,14 +325,28 @@ const ProfilePage = () => {
               <div>
                 <p className="text-sm text-gray-400 mb-1">Taken slots:</p>
                 <div className="flex flex-wrap gap-2">
-                  {takenTimes.map((time) => (
-                    <span
-                      key={time}
-                      className="text-xs bg-gray-800 border border-gray-700 px-2 py-1 rounded"
-                    >
-                      {time}
-                    </span>
-                  ))}
+                  {takenTimes.map((time) => {
+                    // Convert 12h format to 24h format if needed
+                    let displayTime = time;
+                    if (time.includes("AM") || time.includes("PM")) {
+                      const [timePart, period] = time.split(" ");
+                      const [hour, minute] = timePart.split(":");
+                      let hour24 = parseInt(hour);
+                      if (period === "PM" && hour24 !== 12) hour24 += 12;
+                      if (period === "AM" && hour24 === 12) hour24 = 0;
+                      displayTime = `${hour24
+                        .toString()
+                        .padStart(2, "0")}:${minute}`;
+                    }
+                    return (
+                      <span
+                        key={time}
+                        className="text-xs bg-gray-800 border border-gray-700 px-2 py-1 rounded"
+                      >
+                        {displayTime}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}

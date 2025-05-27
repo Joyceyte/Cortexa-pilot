@@ -47,11 +47,11 @@ const LogDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 px-4 py-6">
-      <div className="max-w-2xl mx-auto flex flex-col gap-6">
+      <div className="max-w-2xl mx-auto flex flex-col gap-6 mb-32">
         {/* Back */}
         <button
           onClick={() => navigate("/logs")}
-          className="text-sm text-gray-400 hover:text-orange-300 transition-colors"
+          className="text-left text-sm text-gray-400 hover:text-orange-300 transition-colors"
         >
           ← Back
         </button>
@@ -70,7 +70,7 @@ const LogDetailPage = () => {
         </div>
 
         {/* Footer Vibe */}
-        <p className="text-center text-xs text-gray-600 mt-6">
+        <p className="text-center text-xs text-gray-600 ">
           You made it through today. That's worth logging.
         </p>
       </div>
