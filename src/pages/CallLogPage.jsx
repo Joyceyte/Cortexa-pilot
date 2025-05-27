@@ -29,7 +29,7 @@ const LogsPage = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-200 px-4 py-8 mb-12">
+    <div className="min-h-screen bg-gray-950 text-gray-200 px-4 py-8">
       <header className="mb-10 max-w-2xl mx-auto text-center">
         <h1 className="text-3xl font-semibold text-orange-300">Your Journal</h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -37,12 +37,12 @@ const LogsPage = () => {
         </p>
       </header>
 
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6 mb-24">
         {logs.map((log) => (
           <Link
             to={`/logs/${log.id}`}
             key={log.id}
-            className="block border border-gray-800 bg-gray-900 rounded-lg p-5 hover:border-orange-400 transition-colors"
+            className="block border border-gray-800 bg-gray-900 rounded-lg p-5 transition-colors"
           >
             <div className="mb-3">
               <h3 className="text-lg font-medium text-orange-200">

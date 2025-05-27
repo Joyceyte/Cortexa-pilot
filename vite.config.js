@@ -12,7 +12,7 @@ export default defineConfig({
         name: "Cortexa Calls",
         short_name: "Cortexa",
         description: "AI Emotional Check-in Calls",
-        theme_color: "#a855f7",
+        theme_color: "#030712",
         background_color: "#000000",
         display: "standalone",
         start_url: "/",
