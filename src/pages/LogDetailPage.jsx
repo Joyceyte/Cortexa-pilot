@@ -58,7 +58,7 @@ const LogDetailPage = () => {
 
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-bold text-orange-300">{log.title}</h1>
+          <h1 className="text-xl font-bold text-orange-300">{log.title}</h1>
           <p className="text-sm text-gray-500 mt-1">
             Written by you, felt by Cortexa
           </p>
