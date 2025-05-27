@@ -65,7 +65,7 @@ const LogDetailPage = () => {
         </div>
 
         {/* Log Body */}
-        <div className="whitespace-pre-wrap text-base leading-relaxed text-gray-300 border border-red-500 p-5 bg-gray-900 tracking-wide">
+        <div className="whitespace-pre-wrap text-base rounded-lg eading-relaxed text-gray-300 border border-gray-800 p-5 bg-gray-900 tracking-wide">
           {cleanedTranscript}
         </div>
 
