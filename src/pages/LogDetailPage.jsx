@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import FollowUpQuestion from "../components/FollowUpQuestion";
 
 const LogDetailPage = () => {
   const { id } = useParams();
@@ -68,7 +69,9 @@ const LogDetailPage = () => {
         <div className="whitespace-pre-wrap text-base rounded-lg eading-relaxed text-gray-300 border border-gray-800 p-5 bg-gray-900 tracking-wide">
           {cleanedTranscript}
         </div>
-
+        {log.transcript && id && (
+          <FollowUpQuestion transcript={log.transcript} logId={id} />
+        )}
         {/* Footer Vibe */}
         <p className="text-center text-xs text-gray-600 ">
           You made it through today. That's worth logging.

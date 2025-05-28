@@ -19,6 +19,7 @@
     "firebase-functions": "^6.3.2",
     "luxon": "^3.6.1",
     "node-fetch": "^3.3.2",
+    "openai": "^4.103.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-firebase-hooks": "^5.1.1",
