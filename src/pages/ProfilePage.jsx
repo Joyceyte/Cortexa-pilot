@@ -149,9 +149,11 @@ const ProfilePage = () => {
         const userDocRef = doc(db, "users", user.uid);
         const timeSlotDocRef = doc(db, "takenCallTimes", storageTime);
 
+        // Get current user data
         const userSnap = await getDoc(userDocRef);
         const oldCallTime = userSnap.exists() ? userSnap.data().callTime : null;
 
+        // If the time hasn't changed, just update the phone number
         if (storageTime === oldCallTime) {
           await setDoc(userDocRef, {
             phone,
@@ -167,28 +169,38 @@ const ProfilePage = () => {
           return;
         }
 
+        // Check if new time slot is already taken
         const timeSlotSnap = await getDoc(timeSlotDocRef);
         if (timeSlotSnap.exists()) {
           alert("That time slot is already taken. Please pick another.");
           return;
         }
 
-        if (oldCallTime && oldCallTime !== storageTime) {
-          const oldTimeSlotDocRef = doc(db, "takenCallTimes", oldCallTime);
-          await deleteDoc(oldTimeSlotDocRef);
+        // Delete old time slot if it exists
+        if (oldCallTime) {
+          try {
+            const oldTimeSlotDocRef = doc(db, "takenCallTimes", oldCallTime);
+            await deleteDoc(oldTimeSlotDocRef);
+          } catch (deleteError) {
+            console.error("Error deleting old time slot:", deleteError);
+            // Continue with the update even if deletion fails
+          }
         }
 
+        // Update user document with new time
         await setDoc(userDocRef, {
           phone,
           callTime: storageTime,
           uid: user.uid,
         });
 
+        // Add new time slot
         await setDoc(timeSlotDocRef, {
           uid: user.uid,
           timestamp: new Date(),
         });
 
+        // Refresh taken times and update UI
         await fetchTakenTimes();
         setCallTime(displayTime);
         setSuccessMsg("Details updated!");
